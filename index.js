@@ -1,1 +1,5 @@
-module.exports = require('./lib/EventSource');
+module.exports = {
+    EventSource: require('./lib/EventSource'),
+    DynamoDB: require('./lib/database/dynamodb'),
+    MongoDB: require('./lib/database/mongodb'),
+};
