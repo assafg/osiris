@@ -1,6 +1,7 @@
 # Osiris
 ## Simple event sourceing for node
-    Osiris is an Egyptian god, identified as the god of the afterlife, the underworld, and the dead, but more appropriately as the god of transition, resurrection, and regeneration
+> Osiris is an Egyptian god, identified as the god of the afterlife, the underworld, and the dead, 
+> but more appropriately as the god of transition, resurrection, and regeneration
    
 This projec tries to make event sourcing simple and straight forward.
 
