@@ -1,0 +1,21 @@
+{
+  "name": "charon",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "prettier": "prettier --write --tab-width 4 --single-quote --print-width=120 --trailing-comma es5  '**/*.js'"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.197.0",
+    "faker": "^4.1.0",
+    "lodash": "^4.17.5",
+    "moment": "^2.20.1",
+    "mongojs": "^2.5.0",
+    "tape": "^4.8.0",
+    "uuid": "^3.2.1"
+  },
+  "devDependencies": {
+    "prettier": "1.10.2"
+  }
+}
