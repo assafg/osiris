@@ -29,16 +29,125 @@ const es = new EventSource(db);
 ...
 
 es.onEvent({
-    context, // The context is the key of the event source
+    context: 'Bob', // The context is the key of the event source
+    company: 'Hooly',
+    ... 
+})
+es.onEvent({
+    context: 'Bob', // The context is the key of the event source
+    title: 'VP Past Mistakes',
     ... 
 })
 
 es.getState(context)
     .then(state => {
-        console.log(state);
+        console.log(state); 
+        /*
+        {
+            context: 'Bob',
+            company: 'Hooly',
+            title: 'VP Past Mistakes',
+        }
+        */
     })
     .catch(err => {
         console.error(err);
     });
 
 ```
+
+You can also ask the EventSource to aggregate specific fields:
+
+```javascript
+...
+const es = new EventSource(db, {
+   overtime: true
+});
+...
+
+es.onEvent({
+    context: 'Bob',
+    overtime: 1
+})
+es.onEvent({
+    context: 'Bob',
+    overtime: 3
+})
+
+es.getState(context)
+    .then(state => {
+        console.log(state); 
+        /*
+        {
+            context: 'Bob',
+            overtime: 4,
+        }
+        */
+    })
+    .catch(err => {
+        console.error(err);
+    });
+
+```
+
+### Backing DB
+The backing DB is actually a single collection (Mongo) or Table (any other DB) that acts as the persistance to the "context" or model.
+The DB should have 2 indises: "context" (string/hash) and "createdAt" (number/RANGE) - the indices should not be unique but the "createdAt" should be asscending so the queries will bring the oldest records first. When reducing the results to a single state we want the last record (i.e. event) to be the most significant.
+
+### Current limitations
+For the sake of simplicity, this model currently only fully supports first level aggregation/merge - if a more complex model is stored then the merge operation will override the first level elements:
+
+```javascript
+event0 = {
+   context: 'John',
+   family: {
+      father: 'Mike',
+      Mother: 'Mary',
+   }
+   
+event1 = {
+   context: John,
+   family: {
+      uncle: 'Bob',
+   }
+}   
+ ...
+ // State will be
+ state = {
+   context: 'John',
+   family: { // the last will be overriden
+      uncle: 'Bob',
+   }
+}
+```
+
+Instead use a flat model for best results:
+
+```javascript
+event0 = {
+   context: 'John',
+   family_father: 'Mike',
+   family_Mother: 'Mary'
+}
+   
+event1 = {
+   context: 'John',
+   family_uncle: 'Bob'
+}
+   
+ ...
+ // State will be
+ state = {
+   context: John,
+   family_father: Mike,
+   family_Mother: Mary,
+   family_uncle: Bob
+}
+```
+
+## Next Steps:
+- Better Documentation and API Documentation
+- Tests
+- More DB Implementations
+- More examples
+- Support for archiving / deleting records
