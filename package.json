@@ -1,7 +1,9 @@
 {
   "name": "osiris-es",
+  "description": "Event sourcing made easy for nodejs",
   "version": "1.0.9",
   "main": "index.js",
+  "repository": "https://github.com/assafg/osiris",
   "license": "MIT",
   "scripts": {
     "prettier": "prettier --write --tab-width 4 --single-quote --print-width=120 --trailing-comma es5  '**/*.js'"
