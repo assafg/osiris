@@ -1,0 +1,13 @@
+{
+  "name": "service",
+  "version": "1.0.0",
+  "main": "handler.js",
+  "license": "MIT",
+  "dependencies": {
+    "osiris-es": "^1.0.9"
+  },
+  "devDependencies": {
+    "serverless-dynamodb-local": "^0.2.27",
+    "serverless-offline": "^3.17.0"
+  }
+}
