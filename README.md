@@ -1,5 +1,5 @@
 # Osiris
-## Simple event sourceing for nodejs (Beta)
+## Simple event sourcing for nodejs (Beta)
 > Osiris is an Egyptian god, identified as the god of the afterlife, the underworld, and the dead, 
 > but more appropriately as the god of transition, resurrection, and regeneration
    
@@ -92,7 +92,7 @@ es.getState(context)
 
 ### Backing DB
 The backing DB is actually a single collection (Mongo) or Table (any other DB) that acts as the persistance to the "context" or model.
-The DB should have 2 indises: "context" (string/hash) and "createdAt" (number/RANGE) - the indices should not be unique but the "createdAt" should be asscending so the queries will bring the oldest records first. When reducing the results to a single state we want the last record (i.e. event) to be the most significant.
+The DB should have 2 indices: "context" (string/hash) and "createdAt" (number/RANGE) - the indices should not be unique but the "createdAt" should be asscending so the queries will bring the oldest records first. When reducing the results to a single state we want the last record (i.e. event) to be the most significant.
 
 ### Current limitations
 For the sake of simplicity, this model currently only fully supports first level aggregation/merge - if a more complex model is stored then the merge operation will override the first level elements:
