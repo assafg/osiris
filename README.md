@@ -89,10 +89,37 @@ es.getState(context)
     });
 
 ```
+### Waht is "Context"
+"Context" in this project is the "subject" fot the query. Let's say I'm storing user information then the "context" will be the user identifier. If I want the state of all the users in a specific *company* then the context will be the company's identifier.
+Consider the following sourced events:
+```
+{ name: 'bob', company: 'acme', salary: 1000, createdAt: 1000 }
+{ name: 'jane', company: 'acme', salary: 2000, createdAt: 1001 }
+{ name: 'nancy', company: 'acme', salary: 4000, createdAt: 1002 }
+{ name: 'bob', company: 'globex', salary: 1500, createdAt: 1003 }
+```
+To get the state of 'bob': 
+```
+const es = new EventSource(db);
+es.getState('bob').then(state => {
+   // State should be: { name: 'bob', company: 'globex', salary: 1500, createdAt: 1003 }
+)
+```
+and to get the state of 'acme' company:
+```
+const es = new EventSource(db, { salary: true });
+es.getState('acme').then(state => {
+   // State should be: { name: 'nancy', company: 'acme', salary: 7000, createdAt: 1002 }
+)
+
+```
+Using different *contexts* for a single store can be tricky and may require specific indices and a more fine-grained aggregation
+behavior.
+The intention of this library is to provide a simple solution for explicit use cases and ***not*** to cover all the edge-cases. in the example above a better approach would be to create a separate store for the company state.
 
 ### Backing DB
-The backing DB is actually a single collection (Mongo) or Table (any other DB) that acts as the persistance to the "context" or model.
-The DB should have 2 indices: "context" (string/hash) and "createdAt" (number/RANGE) - the indices should not be unique but the "createdAt" should be asscending so the queries will bring the oldest records first. When reducing the results to a single state we want the last record (i.e. event) to be the most significant.
+The backing DB is actually a single collection (Mongo) or Table (any other DB) that acts as the persistence to the "context" or model.
+The DB should have 2 indices: "context" (string/hash) and "createdAt" (number/RANGE) - the indices should not be unique but the "createdAt" should be ascending so the queries will fetch the oldest records first. When reducing the results to a single state we want the last record (i.e. event) to be the most significant.
 
 ### Current limitations
 For the sake of simplicity, this model currently only fully supports first level aggregation/merge - if a more complex model is stored then the merge operation will override the first level elements:
@@ -144,6 +171,9 @@ event1 = {
    family_uncle: Bob
 }
 ```
+
+### Snapshot
+Over time the number of events can get large and the time to retrieve and reduce the state can be time-consuming therefore we create snapshots that will be the basis of next states' calculation. Currently, the snapshot is taken automatically if on state retrieval there are over 1000 events (this passive approach can be dangerous a state is created infrequently - in this case a snapshot should be created actively by calling `es.snapshot()`.
 
 ## Next Steps:
 - Better Documentation and API Documentation
