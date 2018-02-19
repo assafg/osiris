@@ -99,14 +99,14 @@ Consider the following sourced events:
 { name: 'bob', company: 'globex', salary: 1500, createdAt: 1003 }
 ```
 To get the state of 'bob': 
-```
+```javascript
 const es = new EventSource(db);
 es.getState('bob').then(state => {
    // State should be: { name: 'bob', company: 'globex', salary: 1500, createdAt: 1003 }
 )
 ```
 and to get the state of 'acme' company:
-```
+```javascript
 const es = new EventSource(db, { salary: true });
 es.getState('acme').then(state => {
    // State should be: { name: 'nancy', company: 'acme', salary: 7000, createdAt: 1002 }
