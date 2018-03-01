@@ -89,7 +89,7 @@ es.getState(context)
     });
 
 ```
-### Waht is "Context"
+### What is "Context"
 "Context" in this project is the "subject" fot the query. Let's say I'm storing user information then the "context" will be the user identifier. If I want the state of all the users in a specific *company* then the context will be the company's identifier.
 Consider the following sourced events:
 ```
