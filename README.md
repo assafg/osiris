@@ -5,6 +5,8 @@
    
 This project tries to make event sourcing simple and straight forward.
 
+*If you're new to Event Sourcing a good reference can be found [here](http://microservices.io/patterns/data/event-sourcing.html)*
+
 ### Usage
 
 ```
