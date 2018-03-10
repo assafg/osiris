@@ -1,7 +1,7 @@
 {
   "name": "osiris-es",
   "description": "Event sourcing made easy for nodejs",
-  "version": "1.0.10",
+  "version": "1.1.0",
   "main": "index.js",
   "repository": "https://github.com/assafg/osiris",
   "license": "MIT",
@@ -13,11 +13,12 @@
     "lodash": "^4.17.5",
     "moment": "^2.20.1",
     "mongojs": "^2.5.0",
+    "pg": "^7.4.1",
     "uuid": "^3.2.1"
   },
   "devDependencies": {
-    "prettier": "1.10.2",
     "faker": "^4.1.0",
+    "prettier": "1.10.2",
     "tape": "^4.8.0"
   }
 }

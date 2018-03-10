@@ -25,7 +25,7 @@ provider:
 #  stage: dev
   region: us-east-1
   environment:
-    DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}-player-scores
+    DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}-player-scores-example
 
   iamRoleStatements:
     - Effect: Allow
@@ -127,7 +127,7 @@ resources:
       Properties:
         AttributeDefinitions:
           -
-            AttributeName: createdAt
+            AttributeName: seq
             AttributeType: N
           -
             AttributeName: context
@@ -137,7 +137,7 @@ resources:
             AttributeName: context
             KeyType: HASH
           -
-            AttributeName: createdAt
+            AttributeName: seq
             KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 1

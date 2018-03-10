@@ -95,23 +95,23 @@ es.getState(context)
 "Context" in this project is the "subject" fot the query. Let's say I'm storing user information then the "context" will be the user identifier. If I want the state of all the users in a specific *company* then the context will be the company's identifier.
 Consider the following sourced events:
 ```
-{ name: 'bob', company: 'acme', salary: 1000, createdAt: 1000 }
-{ name: 'jane', company: 'acme', salary: 2000, createdAt: 1001 }
-{ name: 'nancy', company: 'acme', salary: 4000, createdAt: 1002 }
-{ name: 'bob', company: 'globex', salary: 1500, createdAt: 1003 }
+{ name: 'bob', company: 'acme', salary: 1000, seq: 1000 }
+{ name: 'jane', company: 'acme', salary: 2000, seq: 1001 }
+{ name: 'nancy', company: 'acme', salary: 4000, seq: 1002 }
+{ name: 'bob', company: 'globex', salary: 1500, seq: 1003 }
 ```
 To get the state of 'bob': 
 ```javascript
 const es = new EventSource(db);
 es.getState('bob').then(state => {
-   // State should be: { name: 'bob', company: 'globex', salary: 1500, createdAt: 1003 }
+   // State should be: { name: 'bob', company: 'globex', salary: 1500, seq: 1003 }
 )
 ```
 and to get the state of 'acme' company:
 ```javascript
 const es = new EventSource(db, { salary: true });
 es.getState('acme').then(state => {
-   // State should be: { name: 'nancy', company: 'acme', salary: 7000, createdAt: 1002 }
+   // State should be: { name: 'nancy', company: 'acme', salary: 7000, seq: 1002 }
 )
 
 ```
@@ -121,61 +121,15 @@ The intention of this library is to provide a simple solution for explicit use c
 
 ### Backing DB
 The backing DB is actually a single collection (Mongo) or Table (any other DB) that acts as the persistence to the "context" or model.
-The DB should have 2 indices: "context" (string/hash) and "createdAt" (number/RANGE) - the indices should not be unique but the "createdAt" should be ascending so the queries will fetch the oldest records first. When reducing the results to a single state we want the last record (i.e. event) to be the most significant.
-
-### Current limitations
-For the sake of simplicity, this model currently only fully supports first level aggregation/merge - if a more complex model is stored then the merge operation will override the first level elements:
-
-```javascript
-event0 = {
-   context: 'John',
-   family: {
-      father: 'Mike',
-      Mother: 'Mary',
-   }
-   
-event1 = {
-   context: John,
-   family: {
-      uncle: 'Bob',
-   }
-}   
- ...
- // State will be
- state = {
-   context: 'John',
-   family: { // the last will be overriden
-      uncle: 'Bob',
-   }
-}
-```
-
-Instead use a flat model for best results:
-
-```javascript
-event0 = {
-   context: 'John',
-   family_father: 'Mike',
-   family_Mother: 'Mary'
-}
-   
-event1 = {
-   context: 'John',
-   family_uncle: 'Bob'
-}
-   
- ...
- // State will be
- state = {
-   context: John,
-   family_father: Mike,
-   family_Mother: Mary,
-   family_uncle: Bob
-}
-```
+The DB should have 2 indices: "context" (string/hash) and "seq" (number/RANGE) - the indices should not be unique but the "seq" should be ascending so the queries will fetch the oldest records first. When reducing the results to a single state we want the last record (i.e. event) to be the most significant.
 
 ### Snapshot
 Over time the number of events can get large and the time to retrieve and reduce the state can be time-consuming therefore we create snapshots that will be the basis of next states' calculation. Currently, the snapshot is taken automatically if on state retrieval there are over 1000 events (this passive approach can be dangerous a state is created infrequently - in this case a snapshot should be created actively by calling `es.snapshot()`.
+
+### Supported Databases
+- MongoDB
+- DynamoDB
+- PostgresDB
 
 ## Next Steps:
 - Better Documentation and API Documentation
