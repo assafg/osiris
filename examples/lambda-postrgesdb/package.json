@@ -1,0 +1,9 @@
+{
+  "name": "lambda-postrgesdb",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "osiris-es": "^1.1.0"
+  }
+}
