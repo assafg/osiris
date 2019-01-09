@@ -6,7 +6,9 @@
   "repository": "https://github.com/assafg/osiris",
   "license": "MIT",
   "scripts": {
-    "prettier": "prettier --write --tab-width 4 --single-quote --print-width=120 --trailing-comma es5  '**/*.js'"
+    "prettier": "prettier --write --tab-width 4 --single-quote --print-width=120 --trailing-comma es5  '**/*.js'",
+    "build": "yarn run babel src/ -d lib/",
+    "prepublish": "yarn run build"
   },
   "dependencies": {
     "aws-sdk": "^2.197.0",
@@ -17,7 +19,10 @@
     "uuid": "^3.2.1"
   },
   "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-flow": "^6.23.0",
     "faker": "^4.1.0",
+    "flow-bin": "^0.89.0",
     "prettier": "1.12.1",
     "tape": "^4.8.0"
   }

@@ -1,20 +1,26 @@
+// @flow
+
 const mergeWith = require('lodash/mergeWith');
 const last = require('lodash/last');
 const isObject = require('lodash/isObject');
 
+import type { Event } from './Event'; 
+import type { DB, DBEvent } from './database/DB';
+
 class EventSource {
-    constructor(db, aggregate = {}) {
+    db: DB;
+    aggregate: {};
+
+    constructor(db: DB, aggregate: {} = {}) {
         this.db = db;
         this.aggregate = aggregate;
-        this.reducer = this.reducer.bind(this);
-        this.customizer = this.customizer.bind(this);
     }
 
-    onEvent(evt) {
-        return this.db.insertEvent(evt);
+    onEvent = (evt: Event, isSnapshot: boolean = false) => {
+        return this.db.insertEvent(evt, isSnapshot);
     }
 
-    customizer(objValue, srcValue, key) {
+    customizer = (objValue: {}, srcValue: {}, key: string) => {
         if (this.aggregate[key]) {
             return Number(objValue || 0) + Number(srcValue || 0);
         }
@@ -27,30 +33,30 @@ class EventSource {
             return srcValue;
         }
         if (isObject(objValue) && isObject(srcValue)) {
-            // const obj = mergeWith(objValue, srcValue, this.customizer);
             const obj = mergeWith(objValue, srcValue, this.customizer);
             return obj;
         }
         return objValue;
     }
 
-    reducer(acc, cur) {
+    reducer = (acc: {}, cur: {}) => {
         const obj = mergeWith({}, cur, acc, this.customizer.bind(this));
         return obj;
     }
-    getState(context, createSnapshot = true) {
-        return this.db.getSnapshot(context).then(snapshot => {
+
+    getState = (context: string, createSnapshot: boolean = true) => {
+        return this.db.getSnapshot(context).then((snapshot: DBEvent) => {
             return this.db
                 .getEvents(context, snapshot.seq)
-                .then(events => {
+                .then((events: Array<DBEvent>) => {
                     if (snapshot.seq) {
-                        return events.filter(e => e.seq > snapshot.seq || e.data.isSnapshot);
+                        return events.filter(e => e.seq > snapshot.seq || e.isSnapshot);
                     }
                     return events;
                 })
-                .then(events => {
+                .then((events: Array<DBEvent>) => {
                     if (!events || events.length === 0) {
-                        return snapshot;
+                        return snapshot.data;
                     }
                     const state = events.reduce(this.reducer, {});
 
@@ -61,16 +67,13 @@ class EventSource {
                         this.snapshot(state.data);
                     }
 
-                    // clean the state object
-                    delete state.data.isSnapshot;
                     return state.data;
                 });
         });
     }
 
-    snapshot(state) {
-        const evt = Object.assign({}, state, { isSnapshot: true });
-        this.onEvent(evt);
+    snapshot = (state: Event) => {
+        this.onEvent(state, true);
     }
 }
 

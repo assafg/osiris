@@ -1,7 +1,14 @@
+// @flow
 const { Client } = require('pg');
 
-class PostresDB {
-    constructor({ connectionString, table }) {
+import type { DB } from './DB';
+import type { Event } from '../Event';
+
+class PostresDB implements DB {
+    client: Client;
+    table: string;
+
+    constructor({ connectionString, table }: { connectionString: string, table: string}) {
         this.table = table;
         this.client = new Client({ connectionString });
         this.client.connect(err => {
@@ -32,17 +39,17 @@ class PostresDB {
             });
     }
 
-    insertEvent(evt) {
+    insertEvent(evt: Event, isSnapshot: ?boolean = false) {
         const query = `INSERT INTO "${this.table}"(context, data, isSnapshot) values($1, $2, $3)`;
-        this.client.query(query, [evt.context, evt, evt.isSnapshot]);
+        this.client.query(query, [evt.context, evt, isSnapshot]);
     }
 
-    getEvents(context, id = 0) {
+    getEvents(context: string, id: number = 0) {
         const query = `SELECT id as seq, data FROM "${this.table}" WHERE id>=$1 AND context=$2 ORDER by id`;
         return this.client.query(query, [id, context]).then(res => res.rows);
     }
 
-    getSnapshot(context) {
+    getSnapshot(context: string) {
         const query = `select id as seq, data FROM ${
             this.table
         } WHERE context=$1 AND isSnapshot=true ORDER BY id DESC LIMIT 1`;

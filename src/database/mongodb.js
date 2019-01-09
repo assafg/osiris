@@ -1,7 +1,13 @@
+// @flow
+
 const mongojs = require('mongojs');
 const { v1 } = require('uuid');
+import type { DB, DBEvent } from './DB';
+import type { Event } from '../Event';
 
-class MongoDB {
+class MongoDB implements DB {
+    collection: any;
+
     constructor({ dbpath, collection }) {
         this.db = mongojs(dbpath, [collection]);
         this.collection = this.db.collection(collection);
@@ -12,7 +18,7 @@ class MongoDB {
         });
     }
 
-    insertEvent(evt) {
+    insertEvent(evt: Event) {
         const decorated = Object.assign(
             {},
             {
@@ -31,9 +37,12 @@ class MongoDB {
         });
     }
 
-    getEvents(context, seq = 0) {
+    getEvents(context: string, seq: number = 0): Promise<[DBEvent]>{
         return new Promise((resolve, reject) => {
-            const query = { context };
+            const query = { 
+                context,
+                seq: {},
+             };
             if (seq) {
                 query.seq = {
                     $gte: seq,
@@ -53,13 +62,16 @@ class MongoDB {
         });
     }
 
-    getSnapshot(context) {
+    getSnapshot(context: string): Promise<?DBEvent> {
         return new Promise((resolve, reject) => {
             this.collection.find({ context, isSnapshot: true }).limit(1, (err, snapshot) => {
                 if (err) {
                     return reject(err);
                 }
-                return resolve(snapshot.length > 0 ? snapshot[0] : {});
+                return resolve(snapshot.length > 0 ? 
+                    { data: snapshot[0], isSnapshot: true, seq: snapshot[0].seq  } 
+                    : 
+                    null);
             });
         });
     }
