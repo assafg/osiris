@@ -17,7 +17,7 @@ test('test mongodb - aggregate', t => {
         }
         Promise.all(events).then(() => {
             es.getState().then(state => {
-                t.equal(10, state.number);
+                t.equal(state.number, 10);
                 t.end();
             });
         });
