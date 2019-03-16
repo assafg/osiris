@@ -6,6 +6,7 @@
   "repository": "https://github.com/assafg/osiris",
   "license": "MIT",
   "scripts": {
+    "test": "node ./tests/EventSource.spec",
     "prettier": "prettier --write --tab-width 4 --single-quote --print-width=120 --trailing-comma es5  '**/*.js'"
   },
   "dependencies": {
