@@ -4,10 +4,10 @@
   "main": "handler.js",
   "license": "MIT",
   "dependencies": {
-    "osiris-es": "^1.0.9"
+    "osiris-es": "^1.2.0"
   },
   "devDependencies": {
     "serverless-dynamodb-local": "^0.2.27",
-    "serverless-offline": "^3.17.0"
+    "serverless-offline": "^4.9.1"
   }
 }
