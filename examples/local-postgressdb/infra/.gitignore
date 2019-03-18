@@ -1,0 +1,13 @@
+# ignore mac internal files
+**/.DS_Store
+
+#  Local .terraform directories
+**/.terraform/*
+**/*.plan
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+
+.DS_Store
