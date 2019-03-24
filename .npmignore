@@ -1,0 +1,12 @@
+.idea/
+.vscode
+data/
+integration-tests/
+node_modules/
+src/
+test/
+tests/
+.gitignore
+.babelrc
+.flowconfig
+*.log

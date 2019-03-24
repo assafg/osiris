@@ -118,9 +118,10 @@ once@^1.4.0:
   dependencies:
     wrappy "1"
 
-osiris-es@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/osiris-es/-/osiris-es-1.1.0.tgz#d96790e9b318b1a3676b34d56968ff2db9bea332"
+osiris-es@^1.2.0:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/osiris-es/-/osiris-es-1.3.0.tgz#e4627f03de7539cf5bf3d096baef8e7c3fb54829"
+  integrity sha512-GzFVlEg6nlyG85G5bNkNYxdCBOiGCvNgLVoUoCUasQWbi0BacVlAjWbRnEh6HXGKFfMaO25WdMZIAFy7Rdk/mg==
   dependencies:
     aws-sdk "^2.197.0"
     lodash "^4.17.5"
