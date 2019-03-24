@@ -1,6 +1,7 @@
 .idea/
 .vscode
 data/
+examples/
 integration-tests/
 node_modules/
 src/

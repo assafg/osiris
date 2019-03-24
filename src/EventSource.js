@@ -3,8 +3,7 @@ const last = require('lodash/last');
 const isObject = require('lodash/isObject');
 
 class EventSource {
-    constructor(context, db, aggregate = {}) {
-        this.context = context;
+    constructor(db, aggregate = {}) {
         this.db = db;
         this.aggregate = aggregate;
         this.reducer = this.reducer.bind(this);
@@ -12,7 +11,7 @@ class EventSource {
     }
 
     onEvent(evt) {
-        return this.db.insertEvent(this.context, evt, false);
+        return this.db.insertEvent(evt.context, evt);
     }
 
     customizer(objValue, srcValue, key) {
@@ -40,13 +39,15 @@ class EventSource {
         return obj;
     }
 
-    getState(createSnapshot = true) {
-        return this.db.getSnapshot(this.context).then(snapshot => {
+    getState(context, createSnapshot = true) {
+        return this.db.getSnapshot(context).then(snapshot => {
             return this.db
-                .getEvents(this.context, snapshot.seq)
+                .getEvents(context, snapshot.seq)
                 .then(events => {
                     if (snapshot.seq) {
-                        return events.filter(e => e.seq > snapshot.seq || e.isSnapshot);
+                        return events.filter(
+                            e => e.seq > snapshot.seq || e.isSnapshot
+                        );
                     }
                     return events;
                 })
@@ -73,9 +74,9 @@ class EventSource {
     snapshot(state) {
         if (!state) {
             // Creates a state and then recourses back here
-            return this.getState(true);
+            return this.getState(state.context);
         }
-        return this.db.insertEvent(this.context, state, true);
+        return this.db.insertEvent(state, true);
     }
 }
 
