@@ -20,7 +20,7 @@ service: example-es-postgres
 provider:
   name: aws
   runtime: nodejs6.10
-  region: us-east-1
+  region: us-east-2
 
   environment:
     TABLE_NAME: scores
@@ -96,7 +96,7 @@ resources:
     Type: "AWS::RDS::DBInstance"
     Properties:
       DBName: "esexample"
-      AllocatedStorage: 1
+      AllocatedStorage: "10"
       DBInstanceClass: "db.t2.micro"
       Engine: "postgres"
       EngineVersion: "9.5.4"
