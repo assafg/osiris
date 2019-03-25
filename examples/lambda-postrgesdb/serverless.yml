@@ -16,47 +16,18 @@ service: example-es-postgres
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
 # frameworkVersion: "=X.X.X"
+plugins:
+  - serverless-plugin-additional-stacks
 
 provider:
   name: aws
-  runtime: nodejs6.10
+  runtime: nodejs8.10
   region: us-east-2
 
   environment:
     TABLE_NAME: scores
-    PGCON: postgresql://example:serverless@pgEndpoint:5432/esexample
-# you can overwrite defaults here
-#  stage: dev
-#  region: us-east-1
+    PGCON: postgresql://example:serverless@${cf:example-es-postgres-dev-permanent.pgEndpoint}:5432/esexample
 
-# you can add statements to the Lambda function's IAM Role here
-#  iamRoleStatements:
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:ListBucket"
-#      Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:PutObject"
-#      Resource:
-#        Fn::Join:
-#          - ""
-#          - - "arn:aws:s3:::"
-#            - "Ref" : "ServerlessDeploymentBucket"
-#            - "/*"
-
-# you can define service wide environment variables here
-#  environment:
-#    variable1: value1
-
-# you can add packaging information here
-#package:
-#  include:
-#    - include-me.js
-#    - include-me-dir/**
-#  exclude:
-#    - exclude-me.js
-#    - exclude-me-dir/**
 
 functions:
   handleEvent:
@@ -80,8 +51,8 @@ functions:
           path: snapshot
           method: post
 
-resources:
- Resources:
+
+Resources:
   pgSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -92,30 +63,45 @@ resources:
         ToPort: '5432'
         CidrIp: 0.0.0.0/0
 
-  pgDB:
-    Type: "AWS::RDS::DBInstance"
-    Properties:
-      DBName: "esexample"
-      AllocatedStorage: "10"
-      DBInstanceClass: "db.t2.micro"
-      Engine: "postgres"
-      EngineVersion: "9.5.4"
-      MasterUsername: "example"
-      MasterUserPassword: "serverless"
-      VPCSecurityGroups:
-      - Fn::GetAtt:
-        - pgSecurityGroup
-        - GroupId
-      Tags:
-        -
-          Key: "Name"
-          Value: "es_example"
-    DeletionPolicy: "Snapshot"
+custom:
+  additionalStacks:
+    permanent:
+      Resources:
+        pgSecurityGroup:
+          Type: AWS::EC2::SecurityGroup
+          Properties:
+            GroupDescription: Access to Postgre
+            SecurityGroupIngress:
+            - IpProtocol: tcp
+              FromPort: '5432'
+              ToPort: '5432'
+              CidrIp: 0.0.0.0/0
 
-Outputs:
-    pgEndpoint:
-      Description: "JDBC connection string for database"
-      Value:
-        Fn::GetAtt:
-          - pgDB
-          - Endpoint.Address
+        pgDB:
+          Type: "AWS::RDS::DBInstance"
+          Properties:
+            DBName: "esexample"
+            AllocatedStorage: "10"
+            DBInstanceClass: "db.t2.micro"
+            Engine: "postgres"
+            EngineVersion: "9.5.4"
+            MasterUsername: "example"
+            MasterUserPassword: "serverless"
+            VPCSecurityGroups:
+            - Fn::GetAtt:
+              - pgSecurityGroup
+              - GroupId
+            Tags:
+              -
+                Key: "Name"
+                Value: "es_example"
+          DeletionPolicy: "Snapshot"
+
+      Outputs:
+          pgEndpoint:
+            Description: "JDBC connection string for database"
+            Value:
+              Fn::GetAtt:
+                - pgDB
+                - Endpoint.Address
+
