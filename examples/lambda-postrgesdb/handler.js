@@ -8,83 +8,73 @@ const es = new EventSource(db, {
     score: true,
 });
 
-module.exports.handleEvent = (event, context, callback) => {
+module.exports.handleEvent = async (event, context) => {
     const data = JSON.parse(event.body);
     if (typeof data.context !== 'string') {
         console.error('Validation Failed');
-        callback(null, {
+        return {
             statusCode: 400,
-            body: "Couldn't handle event",
-        });
-        return;
+            body: JSON.stringify({
+                message: "Couldn't handle event",
+            }),
+        };
     }
-    es
-        .onEvent(data)
-        .then(() => {
-            const response = {
-                statusCode: 200,
-                body: JSON.stringify({
-                    message: 'event handled successfully',
-                }),
-            };
-
-            callback(null, response);
-        })
-        .catch(err => {
-            callback(err, {
-                statusCode: 500,
-                body: 'Ooops! Something went wrong',
-            });
-        });
+    try {
+        const state = await es.onEvent(data);
+        return {
+            statusCode: 200,
+            body: JSON.stringify({
+                message: 'event handled successfully',
+            }),
+        };
+    } catch (err) {
+        return {
+            statusCode: 500,
+            body: 'Ooops! Something went wrong',
+            error: err,
+        };
+    }
 };
 
-module.exports.getState = (event, context, callback) => {
+module.exports.getState = async (event, context) => {
     const { ctx } = event.pathParameters;
-    es
-        .getState(ctx)
-        .then(state => {
-            const response = {
-                statusCode: 200,
-                body: JSON.stringify(state),
-            };
-
-            callback(null, response);
-        })
-        .catch(err => {
-            callback(null, {
-                statusCode: 500,
-                body: {
-                    message: 'Ooops! Something went wrong',
-                    error: err,
-                },
-            });
-        });
+    try {
+        const state = await es.getState(ctx);
+        return {
+            statusCode: 200,
+            body: JSON.stringify(state),
+        };
+    } catch (err) {
+        return {
+            statusCode: 500,
+            body: {
+                message: 'Ooops! Something went wrong',
+                error: err,
+            },
+        };
+    }
 };
 
-module.exports.snapshot = (event, context, callback) => {
+module.exports.snapshot = async (event, context) => {
     const data = JSON.parse(event.body);
     if (typeof data.context !== 'string') {
         console.error('Validation Failed');
-        callback(null, {
+        return {
             statusCode: 400,
             body: "Couldn't handle event",
-        });
-        return;
+        };
     }
-    es
-        .snapshot(data.context)
-        .then(state => {
-            const response = {
-                statusCode: 200,
-                body: JSON.stringify(state),
-            };
-
-            callback(null, response);
-        })
-        .catch(err => {
-            callback(err, {
-                statusCode: 500,
-                body: 'Ooops! Something went wrong',
-            });
-        });
+    try {
+        const state = await es.snapshot(data.context);
+        return {
+            statusCode: 200,
+            body: JSON.stringify(state),
+        };
+    } catch (err) {
+        return {
+            statusCode: 500,
+            body: 'Ooops! Something went wrong',
+            error: err,
+        };
+    }
 };
