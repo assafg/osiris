@@ -1,20 +1,27 @@
-const mergeWith = require('lodash/mergeWith');
-const last = require('lodash/last');
-const isObject = require('lodash/isObject');
+// @flow
+import mergeWith from 'lodash/mergeWith';
+import last from 'lodash/last';
+import isObject from 'lodash/isObject';
+import { DB } from './database/Interface';
 
 class EventSource {
-    constructor(db, aggregate = {}) {
+    db: DB;
+    aggregate: Object;
+    customizer: Function;
+    reducer: Function;
+
+    constructor(db: DB, aggregate: Object = {}) {
         this.db = db;
         this.aggregate = aggregate;
         this.reducer = this.reducer.bind(this);
         this.customizer = this.customizer.bind(this);
     }
 
-    onEvent(evt) {
+    onEvent(evt: Object) {
         return this.db.insertEvent(evt.context, evt);
     }
 
-    customizer(objValue, srcValue, key) {
+    customizer(objValue: any, srcValue: any, key: string) {
         if (this.aggregate[key]) {
             return Number(objValue || 0) + Number(srcValue || 0);
         }
@@ -34,12 +41,12 @@ class EventSource {
         return objValue;
     }
 
-    reducer(acc, cur) {
+    reducer(acc: any, cur: Object) {
         const obj = mergeWith({}, cur, acc, this.customizer.bind(this));
         return obj;
     }
 
-    getState(context, createSnapshot = true) {
+    getState(context: string, createSnapshot: boolean = true) {
         return this.db.getSnapshot(context).then(snapshot => {
             return this.db
                 .getEvents(context, snapshot.seq)
@@ -71,12 +78,12 @@ class EventSource {
         });
     }
 
-    snapshot(state) {
+    snapshot(state: Object) {
         if (!state) {
             // Creates a state and then recourses back here
             return this.getState(state.context);
         }
-        return this.db.insertEvent(state, true);
+        return this.db.insertEvent(state.context, state);
     }
 }
 
