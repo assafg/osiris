@@ -1,5 +1,6 @@
 const test = require('tape');
 const { EventSource } = require('../');
+const { Inmemmory } = require('../lib/database/inmemmory');
 
 test('test reducer', function(t) {
     const events = [
@@ -9,7 +10,7 @@ test('test reducer', function(t) {
         { context: 'John Doe', score: 1 },
     ];
 
-    const simpleState = new EventSource();
+    const simpleState = new EventSource(Inmemmory, 'John Doe');
     const expected1 = {
         context: 'John Doe',
         score: 1, // last event's value

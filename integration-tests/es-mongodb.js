@@ -1,9 +1,10 @@
 const test = require('tape');
 const mongojs = require('mongojs');
-const db = mongojs('osiris-test', ['testCollection']);
-const EventSource = require('../lib/EventSource');
-const MongoDB = require('../lib/database/mongodb');
-const DB = new MongoDB({ dbpath: 'osiris-test', collection: 'testCollection' });
+const db = mongojs('osiris', ['testCollection']);
+const { EventSource } = require('../lib/EventSource');
+const { MongoDB } = require('../lib/database/mongo');
+
+
 
 const context = 'count';
 
@@ -49,27 +50,24 @@ const context = 'count';
 //     });
 // });
 
-test('test mongodb - create manual snapshot', t => {
+test('test mongodb - create manual snapshot', async t => {
+    console.log(EventSource);
+    const DB = await MongoDB.build('mongodb://localhost:27017/osiris', 'testCollection' );
+    
     const es = new EventSource(DB);
     db.testCollection.remove({}, () => {
         console.log('removed');
         const events = [];
         for (var i = 0; i < 5; i++) {
-            events.push(es.onEvent({ context, [`${i}`]: i }));
+            events.push(es.onEvent({ context, count: i }));
         }
         Promise.all(events).then(() => {
             es.getState(context, false).then(state => {
-                t.deepEqual(state, {
-                    context: 'count',
-                    '0': 0,
-                    '1': 1,
-                    '2': 2,
-                    '3': 3,
-                    '4': 4,
-                });
+                t.deepEqual(state, { context: 'count', count: 4 });
+
                 db.testCollection.find({}).count((err, num) => {
                     t.equal(num, 5);
-                    es.getState(context).then(state => {
+                    es.getState(context, true).then(state => {
                         db.testCollection.find({}).count((err, num) => {
                             t.equal(num, 6);
                             t.end();
