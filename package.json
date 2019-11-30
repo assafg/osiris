@@ -11,22 +11,22 @@
         "prettier": "prettier --write --tab-width 4 --single-quote --print-width=120 --trailing-comma es5  '**/*.js'"
     },
     "dependencies": {
-        "aws-sdk": "^2.197.0",
-        "lodash": "^4.17.5",
-        "moment": "^2.20.1",
+        "aws-sdk": "^2.580.0",
+        "lodash": "^4.17.15",
+        "moment": "^2.24.0",
         "mongodb": "^3.3.5",
-        "pg": "^7.4.1",
+        "pg": "^7.14.0",
         "typescript": "^3.7.2",
-        "uuid": "^3.2.1"
+        "uuid": "^3.3.3"
     },
     "devDependencies": {
-        "mongojs": "^2.5.0",
+        "mongojs": "^3.1.0",
         "@types/lodash": "^4.14.149",
         "@types/mongodb": "^3.3.11",
         "@types/uuid": "^3.4.6",
         "faker": "^4.1.0",
-        "flow-bin": "^0.95.1",
-        "prettier": "1.16.4",
-        "tape": "^4.8.0"
+        "flow-bin": "^0.112.0",
+        "prettier": "1.19.1",
+        "tape": "^4.11.0"
     }
 }
