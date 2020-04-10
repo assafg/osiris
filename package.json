@@ -8,7 +8,8 @@
     "scripts": {
         "test": "node ./tests/EventSource.spec",
         "ts": "tsc --watch",
-        "prettier": "prettier --write --tab-width 4 --single-quote --print-width=120 --trailing-comma es5  '**/*.js'"
+        "build": "tsc",
+        "prettier": "prettier --write 'src/**'"
     },
     "dependencies": {
         "aws-sdk": "^2.580.0",
@@ -20,12 +21,13 @@
         "uuid": "^3.3.3"
     },
     "devDependencies": {
-        "mongojs": "^3.1.0",
         "@types/lodash": "^4.14.149",
         "@types/mongodb": "^3.3.11",
+        "@types/pg": "^7.11.2",
         "@types/uuid": "^3.4.6",
         "faker": "^4.1.0",
         "flow-bin": "^0.112.0",
+        "mongojs": "^3.1.0",
         "prettier": "1.19.1",
         "tape": "^4.11.0"
     }

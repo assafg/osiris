@@ -1,26 +1,25 @@
-import { DB, Event } from '../types';
+import { DB, Event, Context } from '../types';
 
 export class Inmemmory implements DB {
     events: Event[] = [];
 
-    insertEvent(context: string, evt: any): Promise<Event> {
+    insertEvent(evt: any): Promise<Event> {
         return new Promise(resolve => {
             const event = Object.assign({}, evt, {
-                context,
                 seq: this.events.length,
             });
             this.events.push(event);
             resolve(event);
         });
     }
-    getEvents(context: string, seq?: number): Promise<Event[]> {
+    getEvents(context: Context, seq?: number): Promise<Event[]> {
         return new Promise(resolve => {
-            resolve([...this.events]);
+            resolve([...this.events.filter((e: Event) => e[context.name] === context.value )]);
         });
     }
-    getSnapshot(context: string): Promise<Event> {
+    getSnapshot(context: Context): Promise<Event> {
         return new Promise(resolve => {
-            resolve(this.events.find(e => e.isSnapshot));
+            resolve(this.events.find(e => e.isSnapshot && e[context.name] === context.value));
         });
     }
 }

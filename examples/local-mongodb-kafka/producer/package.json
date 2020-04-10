@@ -1,0 +1,13 @@
+{
+  "name": "producer",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "node ."
+  },
+  "dependencies": {
+    "faker": "^4.1.0",
+    "node-rdkafka": "^2.8.0"
+  }
+}

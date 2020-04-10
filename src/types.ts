@@ -1,12 +1,17 @@
 export interface DB {
-    insertEvent(contex: string, evt: any): Promise<Event>;
-    getEvents(context: string, seq?: number): Promise<Event[]>;
-    getSnapshot(context: string): Promise<Event>;
+    insertEvent(evt: any): Promise<Event>;
+    getEvents(context: Context, seq?: number): Promise<Event[]>;
+    getSnapshot(context: Context): Promise<Event> | null;
 }
 
 export interface Event {
     _id?: string;
     seq?: number;
     isSnapshot?: boolean;
-    context: any;
+    [key: string]: any;
+}
+
+export type Context = {
+    name: string;
+    value: string | number;
 }
