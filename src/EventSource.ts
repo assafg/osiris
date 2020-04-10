@@ -1,5 +1,5 @@
 import { mergeWith, last, isObject } from 'lodash';
-import { DB, Event } from './types';
+import { DB, Event, Context } from './types';
 
 export class EventSource {
     db: DB;
@@ -11,7 +11,7 @@ export class EventSource {
     }
 
     onEvent(evt: Event) {
-        return this.db.insertEvent(evt.context, evt);
+        return this.db.insertEvent(evt);
     }
 
     customizer = (objValue: any, srcValue: any, key: string): any | null => {
@@ -28,11 +28,7 @@ export class EventSource {
         }
         if (isObject(objValue) && isObject(srcValue)) {
             // const obj = mergeWith(objValue, srcValue, this.customizer);
-            const obj: Event = mergeWith(
-                objValue,
-                srcValue,
-                this.customizer
-            ) as Event;
+            const obj: Event = mergeWith(objValue, srcValue, this.customizer) as Event;
             return obj;
         }
         return objValue;
@@ -43,12 +39,9 @@ export class EventSource {
         return obj;
     };
 
-    getState = async (context: string, createSnapshot: boolean = true) => {
+    getState = async (context: Context, createSnapshot: boolean = true) => {
         const snapshot = await this.db.getSnapshot(context);
-        let events = await this.db.getEvents(
-            context,
-            snapshot ? snapshot.seq : 0
-        );
+        let events = await this.db.getEvents(context, snapshot ? snapshot.seq : 0);
 
         // Find only events after the snapshot
         if (snapshot && snapshot.seq) {
@@ -61,12 +54,11 @@ export class EventSource {
         }
 
         const state: Event = events.reduce(this.reducer, {});
-        console.log(events);
         if (createSnapshot && state) {
             state.isSnapshot = true;
 
             // create a snapshot every time for increased efficiency
-            this.snapshot(state);
+            this.snapshot(context, state);
         }
 
         // clean the state object
@@ -104,12 +96,12 @@ export class EventSource {
         // });
     };
 
-    snapshot(state: Event): Promise<Event> {
+    snapshot(context:Context, state?: Event): Promise<Event> {
         if (!state) {
             // Creates a state and then recourses back here
-            return this.getState(state.context);
+            return this.getState(context);
         }
-        return this.db.insertEvent(state.context, state);
+        return this.db.insertEvent(state);
     }
 }
 

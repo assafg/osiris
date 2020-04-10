@@ -1,65 +1,69 @@
-import { DB, Event } from '../types';
-import { MongoClient, MongoError, Collection, Db } from 'mongodb';
+import { DB, Event, Context } from '../types';
+import { MongoClient, Collection, Db } from 'mongodb';
 import { v1 } from 'uuid';
 
 export class MongoDB implements DB {
     db: Db;
     collection: Collection;
-    counters: Collection;
+    sequences: Collection;
 
-    static build = async (dbpath: string, collectionName: string) => {
-        const client = new MongoClient(dbpath, {
+    dbpath: string;
+    collectionName: string;
+
+    constructor(dbpath: string, collectionName: string) {
+        this.dbpath = dbpath;
+        this.collectionName = collectionName;
+    }
+
+    async connect() {
+        const client = new MongoClient(this.dbpath, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
         });
-        try {
-            await client.connect();
-            const db = await client.db();
-            const collection = await db.collection(collectionName);
-            const counters = await db.collection('counters');
-            collection.createIndex({
-                seq: -1,
-                context: 1,
-                snapshot: 1,
-            });
-            return new MongoDB(db, collection, counters);
-        } catch (err) {
-            console.log(err);
-        }
-    };
 
-    private constructor(db: Db, collection: Collection, counters: Collection) {
+        await client.connect();
+        const db = await client.db();
+        const collection = await db.collection(this.collectionName);
+        const sequences = await db.collection('__sequences');
+        collection.createIndex({
+            seq: -1,
+            snapshot: 1,
+        });
+
         this.db = db;
         this.collection = collection;
-        this.counters = counters;
+        this.sequences = sequences;
     }
 
     async getNextSequenceValue(sequenceName: string) {
-        var sequenceDocument = await this.counters.findOneAndUpdate(
+        const sequenceDocument = await this.sequences.findOneAndUpdate(
             { _id: sequenceName },
-            { $inc: { sequence_value: 1 } }
+            { $inc: { sequence_value: 1 } },
+            { upsert: true }
         );
+
+        if (!sequenceDocument.value) {
+            return 1;
+        }
 
         return sequenceDocument.value.sequence_value;
     }
 
-    insertEvent = async (context: string, evt: any) => {
+    insertEvent = async (evt: any) => {
         const decorated: Event = Object.assign(
             {},
             {
                 _id: v1(),
                 seq: evt.seq || (await this.getNextSequenceValue('es')),
-                context,
             },
             evt
         ) as Event;
 
-        const res = await this.collection.insertOne(decorated);
-        return decorated;
+        return this.collection.insertOne(decorated);
     };
 
-    getEvents = async (context: string, seq: number = 0): Promise<Event[]> => {
-        const query: any = { context };
+    getEvents = async (context: Context, seq: number = 0): Promise<Event[]> => {
+        const query: any = { [context.name]: context.value };
         if (seq) {
             query.seq = {
                 $gte: seq,
@@ -75,8 +79,8 @@ export class MongoDB implements DB {
         });
     };
 
-    getSnapshot(context: string): Promise<Event> {
-        return this.collection.findOne({ context, isSnapshot: true });
+    getSnapshot(context: Context): Promise<Event> {
+        return this.collection.findOne({ [context.name]: context.value, isSnapshot: true });
     }
 }
 
