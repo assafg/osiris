@@ -2,5 +2,4 @@
 .vscode/
 data/
 node_modules/
-test/
 *.log
