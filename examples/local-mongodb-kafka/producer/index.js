@@ -22,8 +22,8 @@ producer.on('ready', function() {
     try {
         // [...Array(30).keys()].forEach(createUser);
 
-        // create a user every second
-        setInterval(createUser, 1000);
+        // create a user every 10 second
+        setInterval(createUser, 10000);
     } catch (err) {
         console.error('A problem occurred when sending our message');
         console.error(err);

@@ -41,6 +41,7 @@ export class EventSource {
 
     getState = async (context: Context, createSnapshot: boolean = true) => {
         const snapshot = await this.db.getSnapshot(context);
+        
         let events = await this.db.getEvents(context, snapshot ? snapshot.seq : 0);
 
         // Find only events after the snapshot
@@ -54,46 +55,18 @@ export class EventSource {
         }
 
         const state: Event = events.reduce(this.reducer, {});
+        
         if (createSnapshot && state) {
             state.isSnapshot = true;
 
             // create a snapshot every time for increased efficiency
-            this.snapshot(context, state);
+            await this.snapshot(context, state);
         }
 
         // clean the state object
         delete state.isSnapshot;
         delete state.seq;
         return state;
-
-        // return .then(snapshot => {
-        //     return
-        //         .then((events: Event[]) => {
-        //             if (snapshot && snapshot.seq) {
-        //                 return events.filter(
-        //                     e => e.seq > snapshot.seq || e.isSnapshot
-        //                 );
-        //             }
-        //             return events;
-        //         })
-        //         .then((events: Event[]) => {
-        //             if (!events || events.length === 0) {
-        //                 return snapshot;
-        //             }
-        //             const state: Event = events.reduce(this.reducer, {});
-
-        //             if (createSnapshot && state) {
-        //                 state.seq = last<any>(events).seq;
-        //                 // create a snapshot every time for increased efficiency
-        //                 this.snapshot(state);
-        //             }
-
-        //             // clean the state object
-        //             delete state.isSnapshot;
-        //             delete state.seq;
-        //             return state;
-        //         });
-        // });
     };
 
     snapshot(context:Context, state?: Event): Promise<Event> {
