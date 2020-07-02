@@ -17,6 +17,20 @@ export class MongoDB implements DB {
         this.collectionName = collectionName;
     }
 
+    async replaceSnapshot(context: Context, state: Event): Promise<void>{
+        const session = this._client.startSession();
+        try{
+            await session.withTransaction(async () => {
+                await this.collection.deleteMany({ [context.name]: context.value, isSnapshot: true });
+                return this.insertEvent(Object.assign({}, state, { isSnapshot: true}));
+            })
+        } catch(e){
+            console.log('The transaction was aborted due to an unexpected error: ', e);
+        } finally {
+            await session.endSession();
+        }
+    }
+
     async connect() {
         this._client = new MongoClient(this.dbpath, {
             useNewUrlParser: true,
@@ -96,6 +110,8 @@ export class MongoDB implements DB {
     getSnapshot(context: Context): Promise<Event> {
         return this.collection.findOne({ [context.name]: context.value, isSnapshot: true });
     }
+
+    
 }
 
 export default { MongoDB };

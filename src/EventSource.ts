@@ -1,4 +1,4 @@
-import { mergeWith, last, isObject } from 'lodash';
+import { mergeWith, isObject } from 'lodash';
 import { DB, Event, Context } from './types';
 
 export class EventSource {
@@ -39,7 +39,7 @@ export class EventSource {
         return obj;
     };
 
-    getState = async (context: Context, createSnapshot: boolean = true) => {
+    getState = async (context: Context) => {
         const snapshot = await this.db.getSnapshot(context);
         
         let events = await this.db.getEvents(context, snapshot ? snapshot.seq : 0);
@@ -56,25 +56,20 @@ export class EventSource {
 
         const state: Event = events.reduce(this.reducer, {});
         
-        if (createSnapshot && state) {
-            state.isSnapshot = true;
-
-            // create a snapshot every time for increased efficiency
-            await this.snapshot(context, state);
-        }
-
+        // async
+        
+        await this.snapshot(context, state);
+        
         // clean the state object
         delete state.isSnapshot;
         delete state.seq;
         return state;
     };
 
-    snapshot(context:Context, state?: Event): Promise<Event> {
-        if (!state) {
-            // Creates a state and then recourses back here
-            return this.getState(context);
-        }
-        return this.db.insertEvent(state);
+    private snapshot(context:Context, state?: Event): Promise<void> {
+        // setImmediate(() => {
+            return this.db.replaceSnapshot(context, state);
+        // })
     }
 }
 

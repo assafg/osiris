@@ -3,3 +3,5 @@
 data/
 node_modules/
 *.log
+
+monitor/build

@@ -1,6 +1,9 @@
 import { DB, Event, Context } from '../types';
 
 export class Inmemmory implements DB {
+    replaceSnapshot(context: Context, state: Event): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
     events: Event[] = [];
 
     insertEvent(evt: any): Promise<Event> {

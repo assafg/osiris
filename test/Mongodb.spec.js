@@ -55,13 +55,30 @@ describe('Test the Event source over mongodb', () => {
         });
 
         const events = await db.getEvents(context);
-        expect(events.length).to.equal(4);
-        expect(events).to.deep.equal([
+        expect([
             { name: 'John Snow', isOnline: true, seq: 1 },
-            { name: 'John Snow', isOnline: true, seq: 2, isSnapshot: true },
             { name: 'John Snow', isOnline: false, seq: 3 },
             { name: 'John Snow', isOnline: false, seq: 4, isSnapshot: true },
-        ]);
+        ]).to.deep.equal(events);
+
+        await es.onEvent({
+            name: context.value,
+            afterSnapshot: true,
+        });
+
+        return new Promise(res => {
+            setImmediate(async () => {
+                const events = await db.getEvents(context);
+                expect([
+                    { name: 'John Snow', isOnline: true, seq: 1 },
+                    { name: 'John Snow', isOnline: false, seq: 3 },
+                    { name: 'John Snow', isOnline: false, seq: 4, isSnapshot: true },
+                    { name: 'John Snow', afterSnapshot:true, seq: 5 },
+                ]).to.deep.equal(events);
+                res();
+            })
+        })
+        
     });
 
     it('should count the number of living characters', async () => {

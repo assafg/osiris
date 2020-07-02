@@ -11,3 +11,5 @@ tests/
 .babelrc
 .flowconfig
 *.log
+
+monitor/

@@ -1,4 +1,5 @@
 export interface DB {
+    replaceSnapshot(context: Context, state: Event): Promise<void>;
     insertEvent(evt: any): Promise<Event>;
     getEvents(context: Context, seq?: number): Promise<Event[]>;
     getSnapshot(context: Context): Promise<Event> | null;
